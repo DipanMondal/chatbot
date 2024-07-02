@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <script>
+        async function sendMessage(message) {
+            const response = await fetch('/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message }),
+            });
+            return await response.json();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('send-button').addEventListener('click', async function() {
+                const chatWindow = document.getElementById('chat-window');
+                const chatInput = document.getElementById('chat-input');
+                const message = chatInput.value;
+
+                if (message.trim() !== "") {
+                    const userMessageElement = document.createElement('div');
+                    userMessageElement.classList.add('chat-message');
+                    userMessageElement.textContent = "You: " + message;
+                    chatWindow.appendChild(userMessageElement);
+
+                    chatInput.value = '';
+
+                    // Send the message to the backend and get the response
+                    const data = await sendMessage(message);
+                    const botMessageElement = document.createElement('div');
+                    botMessageElement.classList.add('chat-message');
+                    botMessageElement.textContent = data.response;
+                    chatWindow.appendChild(botMessageElement);
+
+                    // Scroll to the bottom of the chat window
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                }
+            });
+
+            document.getElementById('clear-button').addEventListener('click', function() {
+                const chatWindow = document.getElementById('chat-window');
+                chatWindow.innerHTML = '';
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header-bar">
+            <h1 align="center">My Bot</h1>
+        </div>
+        <div class="chat-window" id="chat-window">
+            <!-- Chat messages will be appended here -->
+        </div>
+        <div class="input-container">
+            {% csrf_token %}
+            <input type="text" id="chat-input" placeholder="Type a message..." />
+            <button id="send-button">Send</button>
+            <button id="clear-button">Clear Chat</button>
+        </div>
+    </div>
+</body>
+</html>
