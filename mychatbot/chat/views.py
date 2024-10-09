@@ -111,7 +111,10 @@ def chat_message(request):
         message = data.get('message')
 
         # Here, you can implement your chatbot logic to generate a response
-        ans = bot.QandA(enc_model,dec_model,message)
+        try:
+            ans = bot.QandA(enc_model,dec_model,message)
+        except:
+            ans="sorry ! i don't have the answer ." 
         response = f"Bot: {ans}"
 
         return JsonResponse({'response': response})
